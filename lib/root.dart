@@ -20,14 +20,14 @@ class _RootWidgetState extends State<RootWidget> {
     Icons.home,
     Icons.groups,
     Icons.watch_later,
-    Icons.settings,
+    Icons.format_list_bulleted,
   ];
 
   static const _footerItemNames = [
     'ホーム',
     '勉強部屋',
     'タイマー',
-    '設定',
+    '目標',
   ];
 
   // === 追加部分 ===
