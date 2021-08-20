@@ -9,12 +9,6 @@ class StudyRooms extends StatefulWidget {
 class _StudyRoomsState extends State<StudyRooms> {
   final _formKey = GlobalKey<FormState>();
 
-  var tab;
-
-  void changeTab(int num) {
-    tab = num;
-  }
-
   @override
   Widget build(BuildContext context) {
     var list = ["メッセージ", "メッセージ", "メッセージ", "メッセージ", "メッセージ",];
