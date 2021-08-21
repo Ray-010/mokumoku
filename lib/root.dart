@@ -34,8 +34,8 @@ class _RootWidgetState extends State<RootWidget> {
   var _routes = [
     UserProfile(),
     StudyRooms(),
-    Measure(),
-    Settings(),
+    TimerPage(),
+    TodoListPage(),
   ];
   // ==============
 
