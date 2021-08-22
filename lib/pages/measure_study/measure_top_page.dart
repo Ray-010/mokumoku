@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_countdown_timer/index.dart';
 import 'package:study_with_us_test/pages/measure_study/ten_minutes.dart';
+import 'package:study_with_us_test/pages/measure_study/thirty_minutes.dart';
 
-import 'count_down_page.dart';
-import 'count_down_timer_page.dart';
+import 'one_hour.dart';
 
 class TimerPage extends StatefulWidget {
   @override
@@ -102,9 +102,13 @@ class _TimerPageState extends State<TimerPage> {
                       builder: (context) => TenMinutesPage(),
                     ));
                   } else if (timer == 30) {
-
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => ThirtyMinutesPage(),
+                    ));
                   } else if (timer == 60) {
-
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => OneHourPage(),
+                    ));
                   }
                 },
                 child: Text(

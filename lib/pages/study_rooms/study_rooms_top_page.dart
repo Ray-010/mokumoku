@@ -17,6 +17,12 @@ class _StudyRoomsState extends State<StudyRooms> {
       child: Scaffold(
         appBar: AppBar(
           actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+
+              },
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: IconButton(
