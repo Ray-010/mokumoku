@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:study_with_us_test/root.dart';
+import 'package:study_with_us_test/pages/login_authentication/login.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +17,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: Colors.blueGrey[400],
+        // primaryColor: Colors.blue,
         scaffoldBackgroundColor: Colors.grey[50],
       ),
-      home: RootWidget(),
+      home: LoginPage(),
     );
   }
 }

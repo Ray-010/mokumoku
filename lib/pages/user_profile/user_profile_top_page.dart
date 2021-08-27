@@ -1,23 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:study_with_us_test/pages/user_profile/user_setting_page.dart';
 
 class UserProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('プロフィール'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
-                // ここで設定ページに移動
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => UserSetting()));
               },
             ),
           ),
         ],
-        title: Text('プロフィール'),
       ),
       body: Center(
         child: Container(
