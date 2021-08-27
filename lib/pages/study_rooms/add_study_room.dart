@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+// 部屋の新規追加画面
 class AddStudyRoomPage extends StatefulWidget {
   @override
   _AddStudyRoomPageState createState() => _AddStudyRoomPageState();
@@ -8,7 +10,30 @@ class AddStudyRoomPage extends StatefulWidget {
 class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
   final _formKey = GlobalKey<FormState>();
 
+  TextEditingController titleController = TextEditingController();
+  TextEditingController timeController = TextEditingController();
+
   String? dropdownValue;
+
+  // 新規追加
+  Future<void> addRoom() {
+    CollectionReference rooms = FirebaseFirestore.instance.collection('rooms');
+    var time = int.parse(timeController.text);
+    var hour = (time / 60).floor();
+    var min = time % 60;
+
+    return rooms
+        .add({
+      'title': titleController.text,
+      'members': '0',
+      'studyTime': timeController.text,
+      'createdTime': Timestamp.now(),
+      'finishedTime': DateTime.now().add(Duration(hours: hour, minutes: min)),
+      'roomIn': true,
+    })
+        .then((value) => print("User Added"))
+        .catchError((error) => print("Failed to add user: $error"));
+  }
 
 
   @override
@@ -29,12 +54,14 @@ class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
                     top: 40.0,
                   ),
                 ),
+
+                // 部屋名
                 Container(
                   padding: const EdgeInsets.all(8.0),
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: TextFormField(
-                    // controller: titleController,
-                    maxLength: 10, // ここでRoom名の最大文字数決定
+                    controller: titleController,
+                    maxLength: 10, // ここでRoom名の最大文字数決定 勉強部屋一覧ページで一行のみになるようにしたい
                     style: TextStyle(
                       fontSize: 20,
                     ),
@@ -51,6 +78,8 @@ class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
                     },
                   ),
                 ),
+
+                // 時間入力
                 Padding(
                   padding: const EdgeInsets.only(
                     top: 40.0,
@@ -83,7 +112,7 @@ class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
                           // color: Colors.red,
                           child: TextFormField(
                             textAlign: TextAlign.center,
-                            // controller: timeController, <- これで時間を取得
+                            controller: timeController, // <- これで時間を取得
                             style: TextStyle(
                               fontSize: 20,
                             ),
@@ -109,45 +138,6 @@ class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
                         ),
                       ),
 
-                      /* ドロップダウンボタンを使った場合にやりたいこと
-                      ⇒ 時間を選択しなかったときにエラーを出したい・選んだ値を取得する
-                      Expanded(
-                        flex: 2, // 2 要素分の横幅
-                        child: DropdownButton<String>(
-                          hint: Text('時間を選択'),
-                          icon: const Icon(Icons.arrow_drop_down),
-                          iconSize: 24,
-                          elevation: 16,
-                          style: const TextStyle(
-                              color: Colors.deepPurple
-                          ),
-                          underline: Container(
-                            height: 2,
-                            color: Colors.deepPurpleAccent,
-                          ),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              dropdownValue = newValue!;
-                            });
-                          },
-                          value: dropdownValue,
-                          items: <String>['10', '30', '60', '90']
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(
-                                value,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
-                              ),
-                            );
-                          })
-                              .toList(),
-                        ),
-                      ),
-                       */
-
                       Expanded(
                         flex: 1, // 1 要素分の横幅
                         child: Container(
@@ -168,28 +158,30 @@ class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
                   ),
                 ),
 
-
+                // タグ？
                 Padding(
                   padding: const EdgeInsets.only(
                     top: 40.0,
                   ),
                 ),
-                Container(
-                  // タグはドロップダウンとかで選択？？
-                  padding: const EdgeInsets.all(8.0),
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  child: TextFormField(
-                    style: TextStyle(
-                      fontSize: 20,
-                      height: 1.5,
-                    ),
-                    // controller: tagController, <- これでタグを取得
-                    decoration: InputDecoration(
-                      labelText: "タグ",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
+                // Container(
+                //   // タグはドロップダウンとかで選択？？
+                //   padding: const EdgeInsets.all(8.0),
+                //   width: MediaQuery.of(context).size.width * 0.8,
+                //   child: TextFormField(
+                //     style: TextStyle(
+                //       fontSize: 20,
+                //       height: 1.5,
+                //     ),
+                //     // controller: tagController, <- これでタグを取得
+                //     decoration: InputDecoration(
+                //       labelText: "タグ",
+                //       border: OutlineInputBorder(),
+                //     ),
+                //   ),
+                // ),
+
+                // ボタン
                 Padding(
                   padding: const EdgeInsets.only(
                     top: 30.0,
@@ -203,14 +195,9 @@ class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
                         onPrimary: Colors.white,
                       ),
                       onPressed: () async{
-
-                        // ここのSnackBar要らないかも
                         if (_formKey.currentState!.validate()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Roomを追加しました')),
-                          );
                           // Room追加の処理
-                          // await addMemo();
+                          await addRoom();
 
                           // 作った部屋に自動的に移動する
                           Navigator.pop(context); // とりあえず今は前のページに戻るようにしてる
