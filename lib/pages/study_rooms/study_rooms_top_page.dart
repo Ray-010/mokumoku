@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:study_with_us_test/pages/study_rooms/add_study_room.dart';
+import 'package:study_with_us_test/pages/study_rooms/study_page.dart';
 
+
+// 勉強部屋一覧画面
 class StudyRooms extends StatefulWidget {
   @override
   _StudyRoomsState createState() => _StudyRoomsState();
@@ -9,157 +14,317 @@ class StudyRooms extends StatefulWidget {
 class _StudyRoomsState extends State<StudyRooms> {
   final _formKey = GlobalKey<FormState>();
 
+  final Stream<QuerySnapshot> _roomsStream = FirebaseFirestore.instance.collection('rooms').orderBy('finishedTime', descending: true).snapshots();
+
+  CollectionReference rooms = FirebaseFirestore.instance.collection('rooms');
+
+  // タイマーが終了してから30分後には全て削除
+  Future<void> batchDelete() {
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    return rooms.get().then((querySnapshot) {
+      querySnapshot.docs.forEach((document) {
+        var finished = document['finishedTime'].toDate().add(Duration(minutes: 30));
+        var now = DateTime.now();
+        var time = finished.difference(now).inSeconds;
+        if (time <= 0) {
+          batch.delete(document.reference);
+        }
+      });
+
+      return batch.commit();
+    });
+  }
+
+  // 部屋にはいれるかどうか　入れなくなったらモデルのroomInをfalseに変更
+  Future<void> updateRoomIn(documentId, roomIn) {
+    return rooms
+        .doc(documentId)
+        .update({'roomIn': roomIn })
+        .then((value) => print("User Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  @override
+  void initState() {
+    batchDelete();
+    super.initState();
+  }
+
+  // 時間が終了しているかいなか
+  bool roomIn = true;
+
+
   @override
   Widget build(BuildContext context) {
-    var list = ["メッセージ", "メッセージ", "メッセージ", "メッセージ", "メッセージ",];
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
+    return StreamBuilder<QuerySnapshot>(
+        stream: _roomsStream,
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
 
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => AddStudyRoomPage(),
-                    fullscreenDialog: true,
-                  ));
-                },
-              ),
-            ),
-          ],
-          bottom: TabBar(
-            tabs: [
-              Tab(
-                // icon: Icon(Icons.android),
-                text: "ゆるゆる",
-              ),
-              Tab(
-                  // icon: Icon(Icons.phone_iphone),
-                  text: "つよつよ",
-              ),
-            ],
-          ),
-          title: Text('勉強部屋'),
-        ),
-        body: TabBarView(
-          children: [
-            Center(
-              child: ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  if (index >= list.length) {
-                    list.addAll(["メッセージ","メッセージ","メッセージ","メッセージ",]);
-                  }
-                  return _messageItem(list[index], DefaultTabController.of(context)!.index);
-                },
-              )
-            ),
+        if (snapshot.hasError) {
+          return Text('Something went wrong');
+        }
 
-            Center(
-              child: ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  if (index >= list.length) {
-                    list.addAll(["メッセージ","メッセージ","メッセージ","メッセージ",]);
-                  }
-                  return _messageItem(list[index], DefaultTabController.of(context)!.index);
-                },
-              )
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
 
-  Widget _messageItem(String title, int tab) {
-    return Container(
-      decoration: new BoxDecoration(
-          border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey))
-      ),
-      child:ListTile(
-        title: Text(
-          title,
-          style: TextStyle(
-              color:Colors.black,
-              fontSize: 18.0
-          ),
-        ),
-        onTap: () {
-          if (tab == 0) {
-            // ゆるゆる
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('ゆるゆる部屋に入室したよ！')),
-            );
-          } else if (tab == 1){
-            // つよつよ
-            showConfirmDialog();
-          }
-        },
-        onLongPress: () {
-          print("onLongTap called.");
-        },
-      ),
-    );
-  }
+        return DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              actions: [
+                // IconButton(
+                //   icon: const Icon(Icons.search),
+                //   onPressed: () {
+                //
+                //   },
+                // ),
 
-  Future showConfirmDialog() {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) {
-        return Form(
-          key: _formKey,
-          child: AlertDialog(
-            title: Text("『Room名』部屋"),
-            content: TextFormField(
-              autofocus: true,
-              maxLines: 5,
-              // controller: titleController,
-              style: TextStyle(
-                fontSize: 20,
+                // プラスボタン　ここから部屋を新しく作れる
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => AddStudyRoomPage(),
+                        fullscreenDialog: true,
+                      ));
+                    },
+                  ),
+                ),
+              ],
+
+              // タブバー
+              bottom: TabBar(
+                tabs: [
+                  Tab(
+                    // icon: Icon(Icons.android),
+                    text: "ゆるゆる",
+                  ),
+                  Tab(
+                      // icon: Icon(Icons.phone_iphone),
+                      text: "つよつよ",
+                  ),
+                ],
               ),
-              decoration: InputDecoration(
-                hintText: "例：テキスト１ページ終わらせる！",
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '目標を記入してください';
-                }
-                return null;
-              },
+              title: Text('勉強部屋'),
             ),
-            actions: [
-              TextButton(
-                child: Text("キャンセル"),
-                onPressed: () => Navigator.pop(context),
-              ),
-              TextButton(
-                child: Text("入室する"),
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    final snackBar = SnackBar(
-                      backgroundColor: Colors.red,
-                      content: Text('つよつよ部屋に入室したよ！'),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                    // 作った部屋に自動的に移動する
-                    Navigator.pop(context); // とりあえず今は戻るようにしてる
-                  }
-                },
-              ),
-            ],
+            body: TabBarView(
+              children: [
+                Center(
+                  // ゆるゆる部屋
+                  child: ListView(
+                    children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                      Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+
+                      // 終了後に新たに入れないようにする
+                      var finished = data['finishedTime'].toDate();
+                      var now = DateTime.now();
+                      var time = finished.difference(now).inSeconds;
+                      if (time <= 0) {
+                        // 終了済み ＝ 入れない
+                        roomIn = false;
+                        updateRoomIn(document.id, roomIn);
+                      } else {
+                        roomIn = true;
+                      }
+
+                      return Card(
+                          child: ListTile(
+                            tileColor: data['roomIn'] ? Colors.white : Colors.black12,
+
+                            // 部屋のタイトル
+                            title: Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  border: Border(bottom: BorderSide(
+                                    color: Colors.grey,
+                                    width: 1.0, // Underline thickness
+                                  ))
+                              ),
+                              child: Text(
+                                data['title'],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  decoration: data['roomIn'] ? TextDecoration.none : TextDecoration.lineThrough,
+                                  color: data['roomIn'] ? Colors.black : Colors.black38,
+                                  fontSize: 24,
+                                ),
+                              ),
+                            ),
+
+                            // 時間表示
+                            subtitle: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                    (DateFormat("HH:mm").format(data['createdTime'].toDate().add(Duration(hours: 9))).toString()) + "~" +
+                                        (DateFormat("HH:mm").format(data['finishedTime'].toDate().add(Duration(hours: 9))).toString())
+                                ),
+                              ),
+                            ),
+
+                            // 何人入っているか
+                            trailing: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              width: MediaQuery.of(context).size.width / 5,
+                              height: 50,
+                              child: Text(
+                                data['members'] + '名',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            onTap: (){
+                              // roomInがTrueであれば入ることができる
+                              if (data['roomIn']) {
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id),
+                                ));
+                              }
+                            },
+                          ),
+                        );
+                    }).toList(),
+                  ),
+                ),
+
+                Center(
+                  child: ListView(
+                    children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                      Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+
+                      // 終了後に新たに入れないようにする
+                      var finished = data['finishedTime'].toDate();
+                      var now = DateTime.now();
+                      var time = finished.difference(now).inSeconds;
+                      if (time <= 0) {
+                        // 終了済み ＝ 入れない
+                        roomIn = false;
+                        updateRoomIn(document.id, roomIn);
+                      } else {
+                        roomIn = true;
+                      }
+
+                      return Card(
+                        child: ListTile(
+                          tileColor: data['roomIn'] ? Colors.white : Colors.black12,
+                          // leading: FlutterLogo(size: 56.0),
+                          title: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                                border: Border(bottom: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1.0, // Underline thickness
+                                ))
+                            ),
+                            child: Text(
+                              data['title'],
+                              style: TextStyle(
+                                decoration: data['roomIn'] ? TextDecoration.none : TextDecoration.lineThrough,
+                                color: data['roomIn'] ? Colors.black : Colors.black38,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24,
+                              ),
+                            ),
+                          ),
+                          subtitle: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  (DateFormat("HH:mm").format(data['createdTime'].toDate().add(Duration(hours: 9))).toString()) + "~" +
+                                      (DateFormat("HH:mm").format(data['finishedTime'].toDate().add(Duration(hours: 9))).toString())
+                              ),
+                            ),
+                          ),
+                          // trailing: Icon(Icons.more_vert),
+                          trailing: Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                color: Colors.grey,
+                              ),
+                            ),
+                            width: MediaQuery.of(context).size.width / 4,
+                            child: Text(
+                              data['members'] + '名',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          onTap: (){
+                            // つよつよ部屋に入れるのは目標を宣言した場合のみ
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) {
+                                return Form(
+                                  key: _formKey,
+                                  child: AlertDialog(
+                                    title: Text('『' + data['title'] + '』部屋'),
+                                    content: TextFormField(
+                                      autofocus: true,
+                                      maxLines: 5,
+                                      // controller: titleController,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: "例：テキスト１ページ終わらせる！",
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return '目標を記入してください';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        child: Text("キャンセル"),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                      TextButton(
+                                        child: Text("入室する"),
+                                        onPressed: () async {
+                                          if (data['roomIn']) {
+                                            if (_formKey.currentState!.validate()) {
+                                              Navigator.push(context, MaterialPageRoute(
+                                                builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id),
+                                              ));
+                                            }
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
-      },
+      }
     );
   }
 }
