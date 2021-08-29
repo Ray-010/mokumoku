@@ -1,8 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:study_with_us_test/model/user.dart';
 import 'package:study_with_us_test/pages/user_profile/user_setting_page.dart';
+import 'package:study_with_us_test/utils/firebase.dart';
+import 'package:study_with_us_test/utils/shared_prefs.dart';
 
-class UserProfile extends StatelessWidget {
+
+class UserProfile extends StatefulWidget {
+
+  @override
+  _UserProfileState createState() => _UserProfileState();
+}
+
+class _UserProfileState extends State<UserProfile> {
+  late UserProfileModel userInfo;
+
+  Future<void> getMyUid() async{
+    String myUid = SharedPrefs.getUid();
+    userInfo = await Firestore.getProfile(myUid);
+    print('getMyUid done');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,47 +33,47 @@ class UserProfile extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => UserSetting()));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => UserSetting()));
               },
             ),
           ),
         ],
       ),
-      body: Center(
-        child: Container(
-          child: Column(
-            children: [
-              Container(
-                // color: Colors.pink[100], // 確認用
-                padding: EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Container( // アイコン画像
-                        // color: Colors.green[100], // 確認用
-                        child:  ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Image.network(
-                            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-                            fit: BoxFit.fill,
+      body: FutureBuilder(
+        future: getMyUid(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) { 
+          if(snapshot.connectionState == ConnectionState.done) {
+            return Column(
+              children: [
+                // プロフィール
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // アイコン画像
+                      Container(
+                        child:  CircleAvatar(
+                          // backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: Colors.blue,
+                          radius: 53,
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+                            radius: 50,
                           ),
                         ),
-                      )
-                    ),
-
-                    Expanded(
-                      flex: 2,
-                      child: Container( // 個人プロフィール
-                        padding: EdgeInsets.all(16.0),
-                        // color: Colors.blue, // 確認用
+                      ),
+                      // アイコン右ユーザ詳細
+                      Container(
+                        // color: Colors.indigo,
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding( // 名前
+                            // 名前
+                            Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                'ふくろー',
+                                userInfo.name,
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -93,7 +111,8 @@ class UserProfile extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Padding( // いいね数
+                            // いいね数
+                            Padding( 
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
@@ -104,18 +123,20 @@ class UserProfile extends StatelessWidget {
                                   Text('100')
                                 ],
                               ),
-                            )
+                            ),
                           ],
-                        ),
+                        )
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Text('GitHub 草生やす'),
-            ],
-          ),
-        ),
+                Text('GitHub 草生やす'),
+              ],
+            );
+          } else {
+            return Center(child: CircularProgressIndicator(),);
+          }
+        },
       ),
     );
   }
