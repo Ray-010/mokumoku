@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:study_with_us_test/pages/login_authentication/login.dart';
+import 'package:study_with_us_test/utils/shared_prefs.dart';
 
 class UserSetting extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class _UserSettingState extends State<UserSetting> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: true,
         title: Text('設定'),
       ),
       body: Column(
@@ -18,7 +20,9 @@ class _UserSettingState extends State<UserSetting> {
           SizedBox(height: 40.0,),
           GestureDetector(
             onTap: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPage()));
+              SharedPrefs.removeDataFromPrefs().then((value) {
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPage()));
+              });
             },
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 60.0),

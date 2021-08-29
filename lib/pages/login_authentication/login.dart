@@ -5,6 +5,7 @@ import 'package:study_with_us_test/pages/login_authentication/authentication_err
 import 'package:study_with_us_test/pages/login_authentication/forgot_password.dart';
 import 'package:study_with_us_test/pages/login_authentication/sign_up.dart';
 import 'package:study_with_us_test/root.dart';
+import 'package:study_with_us_test/utils/shared_prefs.dart';
 
 class LoginPage extends StatefulWidget {
 
@@ -192,7 +193,9 @@ class _LoginPageState extends State<LoginPage> {
                     });
                     // ログインユーザのIDを取得
                     if(_user.emailVerified) {
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RootWidget()));
+                      SharedPrefs.setUid(_user.uid).then((value) {
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RootWidget()));
+                      });
                     } else {
                       //Email check
                       // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RootWidget()));
