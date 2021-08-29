@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:study_with_us_test/pages/measure_study/measure_top_page.dart';
 import 'package:study_with_us_test/pages/settings/settings_top_page.dart';
+import 'package:study_with_us_test/pages/study_rooms/room_practice.dart';
 import 'package:study_with_us_test/pages/study_rooms/study_rooms_top_page.dart';
 import 'package:study_with_us_test/pages/user_profile/user_profile_top_page.dart';
 

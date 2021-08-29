@@ -26,6 +26,22 @@ class _StudyPageState extends State<StudyPage> {
 
   CollectionReference rooms = FirebaseFirestore.instance.collection('rooms');
 
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  final Stream<QuerySnapshot> _roomsStream = FirebaseFirestore.instance.collection('rooms').snapshots();
+
+
+
+  Future<void> updateGood(userDocumentId, goodCount){
+    return rooms
+        .doc(widget.documentId)
+        .collection('users')
+        .doc(userDocumentId)
+        .update({'good': (goodCount+1).toString()})
+        .then((value) => print("Good Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
   // 人数を更新する
   Future<void> updatePlusMembers(int before) {
     return rooms
@@ -56,10 +72,12 @@ class _StudyPageState extends State<StudyPage> {
     if (time <= 0){
       // タイマーがゼロになったとき
       // タイマーが終わったときに音を鳴らす＆通知機能を付けたい
-      setState(() {
-        _time = '終了！！';
-        timerfinish = true;
-      });
+      if(mounted){
+        setState(() {
+          _time = '終了！！';
+          timerfinish = true;
+        });
+      }
     } else {
       // タイマーの表示
       String hour = (time / (60 * 60)).floor().toString().padLeft(2, "0");
@@ -67,200 +85,220 @@ class _StudyPageState extends State<StudyPage> {
       String min = (mod / 60).floor().toString().padLeft(2, "0");
       String sec = (mod % 60).toString().padLeft(2, "0");
 
-      setState(() => _time = '$hour時間$min分$sec秒');
+      if(mounted){
+        setState(() => _time = '$hour時間$min分$sec秒');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text('『' + widget.title + '』部屋'),
-          automaticallyImplyLeading: false,
-          ),
-      body: Center(
-        child: Column(
-          children: [
-
-            // タイマーの記述
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                child: Column(
-                  children: [
-                    Text(timerfinish ? '' : 'のこり'),
-                    Container(
-                      decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(
-                            color: Colors.grey,
-                            width: 10.0, // Underline thickness
-                          ))
-                      ),
-                      child: Text(
-                        _time,
-                        style: TextStyle(
-                          fontSize: 40,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+          appBar: AppBar(
+              title: Text('『' + widget.title + '』部屋'),
+              automaticallyImplyLeading: false,
               ),
-            ),
+          body: Center(
+            child: Column(
+              children: [
 
-            // とりあえずのプロフィール部分　自分の情報を入れておきたい
-            Container(
-              // color: Colors.pink[100], // 確認用
-              padding: EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                    Expanded(
-                      flex: 1,
-                        child: Container( // アイコン画像
-                          // color: Colors.green[100], // 確認用
-                          child:  ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: Image.network(
-                              'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-                              fit: BoxFit.fill,
-                              ),
+                // タイマーの記述
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Text(timerfinish ? '' : 'のこり'),
+                        Container(
+                          decoration: BoxDecoration(
+                              border: Border(bottom: BorderSide(
+                                color: Colors.grey,
+                                width: 10.0, // Underline thickness
+                              ))
                           ),
-                        )
+                          child: Text(
+                            _time,
+                            style: TextStyle(
+                              fontSize: 40,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                ),
 
-                    Expanded(
-                      flex: 2,
-                      child: Container( // 個人プロフィール
-                        padding: EdgeInsets.all(16.0),
-                        // color: Colors.blue, // 確認用
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding( // 名前
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'プロフ例',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
+                // とりあえずのプロフィール部分　自分の情報を入れておきたい
+                Container(
+                  // color: Colors.pink[100], // 確認用
+                  padding: EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                        Expanded(
+                          flex: 1,
+                            child: Container( // アイコン画像
+                              // color: Colors.green[100], // 確認用
+                              child:  ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: Image.network(
+                                  'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+                                  fit: BoxFit.fill,
+                                  ),
+                              ),
+                            )
+                        ),
+
+                        Expanded(
+                          flex: 2,
+                          child: Container( // 個人プロフィール
+                            padding: EdgeInsets.all(16.0),
+                            // color: Colors.blue, // 確認用
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding( // 名前
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'プロフ例',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              Padding( // 総勉強時間
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: RichText(
+                                  text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: '総勉強時間: ',
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '10',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: ' 時間',
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ]
+                                  ),
                                 ),
                               ),
-                            ),
-                          Padding( // 総勉強時間
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: RichText(
-                              text: TextSpan(
+                              Padding( // いいね数
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
                                   children: [
-                                    TextSpan(
-                                      text: '総勉強時間: ',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
+                                    Icon(
+                                      Icons.favorite,
+                                      color: Colors.pink,
                                     ),
-                                    TextSpan(
-                                      text: '10',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: ' 時間',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ]
-                              ),
-                            ),
+                                    Text('100')
+                                  ],
+                                ),
+                              )
+                            ],
                           ),
-                          Padding( // いいね数
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ボタン
+                timerfinish ? ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('記録する'),
+                ) : ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('戻る'),
+                ),
+
+                // 他の部屋に入っているユーザー表示部分
+                StreamBuilder<QuerySnapshot>(
+                    stream: rooms.doc(widget.documentId).collection('users').orderBy('inTime').snapshots(),
+                    builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+
+                      if (snapshot.hasError) {
+                        return Text('Something went wrong');
+                      }
+
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        print('waiting');
+                      }
+
+                      return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: GridView.count(
+                          crossAxisCount: 3, // 1行に表示する数
+                          crossAxisSpacing: 4.0, // 縦スペース
+                          mainAxisSpacing: 4.0, // 横スペース
+                          shrinkWrap: true,
+                          children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                            Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+
+                            return Container(
+                              // padding: const EdgeInsets.all(8.0),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                              color: Colors.blue[100],
+                            ),
+                            child:GridTile(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      data['name'],
+                                    ),
+                                    Text(
+                                      data['good'],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // いいね部分
+                              footer: IconButton(
+                                alignment: Alignment.bottomRight,
+                                icon: const Icon(
                                   Icons.favorite,
                                   color: Colors.pink,
                                 ),
-                                Text('100')
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ボタン
-            timerfinish ? ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('記録する'),
-            ) : ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('戻る'),
-            ),
-
-            // 他の部屋に入っているユーザー表示部分
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GridView.count(
-                  crossAxisCount: 3, // 1行に表示する数
-                  crossAxisSpacing: 4.0, // 縦スペース
-                  mainAxisSpacing: 4.0, // 横スペース
-                  shrinkWrap: true,
-                  children: List.generate(100, (index) {
-                    return Container(
-                      // padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.blue[100],
+                                onPressed: (){
+                                  updateGood(document.id, int.parse(data['good']));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('いいねを押しました')),
+                                  );
+                                },
+                              )
+                            ));
+                            }).toList(),
+                          ),
                         ),
-                        child:GridTile(
-                            child: Container(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  Text('User'),
-                                  Text(
-                                    'Meeage $index',
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // いいね部分
-                            footer: IconButton(
-                              alignment: Alignment.bottomRight,
-                              icon: const Icon(
-                                Icons.favorite,
-                                color: Colors.pink,
-                              ),
-                              onPressed: (){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('いいねを押しました')),
-                              );
-                              },
-                            )
-                        )
-                    );
-                  }),
+                      );
+                  }
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
   }
 }

@@ -17,6 +17,7 @@ class _StudyRoomsState extends State<StudyRooms> {
   final Stream<QuerySnapshot> _roomsStream = FirebaseFirestore.instance.collection('rooms').orderBy('finishedTime', descending: true).snapshots();
 
   CollectionReference rooms = FirebaseFirestore.instance.collection('rooms');
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
 
   // タイマーが終了してから30分後には全て削除
   Future<void> batchDelete() {
@@ -41,6 +42,17 @@ class _StudyRoomsState extends State<StudyRooms> {
     return rooms
         .doc(documentId)
         .update({'roomIn': roomIn })
+        .then((value) => print("User Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // rooms > 部屋のドキュメント > 値・usersのコレクション
+  Future<void> addUsers(roomDocumentId, userDocumentId){
+    return rooms
+        .doc(roomDocumentId)
+        .collection('users')
+        .doc(userDocumentId)
+        .set({'inTime': Timestamp.now(), 'name': 'username', 'good': '0'})
         .then((value) => print("User Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
@@ -187,6 +199,10 @@ class _StudyRoomsState extends State<StudyRooms> {
                             onTap: (){
                               // roomInがTrueであれば入ることができる
                               if (data['roomIn']) {
+
+                                // 部屋に入る人をrooms>usersにセットする
+                                addUsers(document.id, 'gt5ZarnI57RmGqsiMQxi1msjqxp2');
+
                                 Navigator.push(context, MaterialPageRoute(
                                   builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id),
                                 ));
@@ -302,6 +318,7 @@ class _StudyRoomsState extends State<StudyRooms> {
                                         onPressed: () async {
                                           if (data['roomIn']) {
                                             if (_formKey.currentState!.validate()) {
+                                              await addUsers(document.id, 'gt5ZarnI57RmGqsiMQxi1msjqxp2');
                                               Navigator.push(context, MaterialPageRoute(
                                                 builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id),
                                               ));
