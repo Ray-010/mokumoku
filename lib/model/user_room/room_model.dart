@@ -23,14 +23,10 @@ class Room {
   bool roomIn;
 }
 
-class roomUser {
-  /*
+class RoomUser {
+  String name;
+  String imagePath;
+  int favorite;
 
-  name
-  image
-  time
-  good
-  id
-
-   */
+  RoomUser({required this.name, required this.imagePath, required this.favorite});
 }

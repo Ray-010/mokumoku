@@ -57,7 +57,7 @@ class _UserProfileState extends State<UserProfile> {
                           backgroundColor: Colors.blue,
                           radius: 53,
                           child: CircleAvatar(
-                            backgroundImage: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg'),
+                            backgroundImage: NetworkImage(userInfo.imagePath),
                             radius: 50,
                           ),
                         ),
@@ -120,7 +120,12 @@ class _UserProfileState extends State<UserProfile> {
                                     Icons.favorite,
                                     color: Colors.pink,
                                   ),
-                                  Text('100')
+                                  Text(
+                                    userInfo.favorite.toString(),
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
