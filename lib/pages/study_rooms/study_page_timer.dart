@@ -1,55 +1,94 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:study_with_us_test/model/user.dart';
-import 'package:study_with_us_test/utils/firebase.dart';
-import 'package:study_with_us_test/utils/shared_prefs.dart';
 
 
-// 勉強部屋に入った後の画面 実際の勉強部屋
+// 勉強部屋に入った後の画面　実際の勉強部屋
 class StudyPage extends StatefulWidget {
   final String title;
   final DateTime finishedTime;
   final String members;
   final String documentId;
-  final String userId;
 
-  StudyPage(this.title, this.finishedTime, this.members, this.documentId, this.userId);
-
+  StudyPage(this.title, this.finishedTime, this.members, this.documentId);
 
   @override
   _StudyPageState createState() => _StudyPageState();
 }
 
 class _StudyPageState extends State<StudyPage> {
+  // タイマーの表示に使う
+  String _time = '';
 
-  List inRoomUserList = [];
-  int inRoomUserNum = 0;
-  Future<void> createUsers() async {
-    inRoomUserList = await Firestore.getUsers(widget.documentId, widget.myUid, inRoomUserList);
-    inRoomUserNum = inRoomUserList.length;
-    print('createUsers');
-  }
-  
-  late UserProfileModel userInfo;
-  Future<void> getMyUid() async{
-    userInfo = await Firestore.getProfile(widget.myUid);
-    print('getMyUid done');
-  }
+  // タイマーがゼロになったかどうか
+  bool timerfinish = false;
 
-  Future<void> deleteUsers(roomDocumentId){
+  CollectionReference rooms = FirebaseFirestore.instance.collection('rooms');
+
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  final Stream<QuerySnapshot> _roomsStream = FirebaseFirestore.instance.collection('rooms').snapshots();
+
+
+
+  Future<void> updateGood(userDocumentId, goodCount){
     return rooms
-        .doc(roomDocumentId)
+        .doc(widget.documentId)
         .collection('users')
-        .doc(widget.userId)
-        .delete()
-        .then((value) => print("User Deleted"))
+        .doc(userDocumentId)
+        .update({'good': (goodCount+1).toString()})
+        .then((value) => print("Good Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // 人数を更新する
+  Future<void> updatePlusMembers(int before) {
+    return rooms
+        .doc(widget.documentId)
+        .update({'members': (before+1).toString()})
+        .then((value) => print("User Updated"))
         .catchError((error) => print("Failed to update user: $error"));
   }
 
   @override
-  Future<void> dispose() async {
-    String myUid = SharedPrefs.getUid();
-    Firestore.getOutRoom(widget.documentId, myUid);
-    super.dispose();
+  void initState() {
+    Timer.periodic(
+      Duration(seconds: 1),
+      _onTimer,
+    );
+
+    // 部屋に入ってきたときに人数を更新
+    updatePlusMembers(int.parse(widget.members));
+    super.initState();
+  }
+
+  // タイマーの処理
+  void _onTimer(Timer timer) {
+    var now = DateTime.now();
+    // a.difference(now).inHours
+    var time = widget.finishedTime.difference(now).inSeconds;
+
+    if (time <= 0){
+      // タイマーがゼロになったとき
+      // タイマーが終わったときに音を鳴らす＆通知機能を付けたい
+      if(mounted){
+        setState(() {
+          _time = '終了！！';
+          timerfinish = true;
+        });
+      }
+    } else {
+      // タイマーの表示
+      String hour = (time / (60 * 60)).floor().toString().padLeft(2, "0");
+      var mod = time % (60 * 60);
+      String min = (mod / 60).floor().toString().padLeft(2, "0");
+      String sec = (mod % 60).toString().padLeft(2, "0");
+
+      if(mounted){
+        setState(() => _time = '$hour時間$min分$sec秒');
+      }
+    }
   }
 
   @override
@@ -57,252 +96,208 @@ class _StudyPageState extends State<StudyPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('『' + widget.title + '』部屋'),
+        automaticallyImplyLeading: false,
       ),
-      body: Column(
-        children: [
-          FutureBuilder(
-              future: getMyUid(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if(snapshot.connectionState == ConnectionState.done) {
-                  return Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                    // アイコン画像
+      body: Center(
+        child: Column(
+          children: [
+
+            // タイマーの記述
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    Text(timerfinish ? '' : 'のこり'),
                     Container(
-                    child:  CircleAvatar(
-                    // backgroundColor: Theme.of(context).primaryColor,
-                    backgroundColor: Colors.blue,
-                      radius: 53,
-                      child: CircleAvatar(
-                        backgroundImage: NetworkImage(userInfo.imagePath),
-                        radius: 50,
+                      decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(
+                            color: Colors.grey,
+                            width: 10.0, // Underline thickness
+                          ))
+                      ),
+                      child: Text(
+                        _time,
+                        style: TextStyle(
+                          fontSize: 40,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // とりあえずのプロフィール部分　自分の情報を入れておきたい
+            Container(
+              // color: Colors.pink[100], // 確認用
+              padding: EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                      flex: 1,
+                      child: Container( // アイコン画像
+                        // color: Colors.green[100], // 確認用
+                        child:  ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.network(
+                            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      )
+                  ),
+
+                  Expanded(
+                    flex: 2,
+                    child: Container( // 個人プロフィール
+                      padding: EdgeInsets.all(16.0),
+                      // color: Colors.blue, // 確認用
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding( // 名前
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'プロフ例',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Padding( // 総勉強時間
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: RichText(
+                              text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '総勉強時間: ',
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '10',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: ' 時間',
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ]
+                              ),
+                            ),
+                          ),
+                          Padding( // いいね数
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.favorite,
+                                  color: Colors.pink,
+                                ),
+                                Text('100')
+                              ],
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),
-                // アイコン右ユーザ詳細
-                Container(
-                // color: Colors.indigo,
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                // 名前
-                Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                userInfo.name,
-                style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                ),
-                ),
-                ),
-                Padding( // 総勉強時間
-                padding: const EdgeInsets.only(left: 8.0),
-                child: RichText(
-                text: TextSpan(
-                children: [
-                TextSpan(
-                text: '総勉強時間: ',
-                style: TextStyle(
-                color: Colors.black87,
-                fontSize: 16,
-                ),
-                ),
-                TextSpan(
-                text: '10',
-                style: TextStyle(
-                color: Colors.black,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                ),
-                ),
-                TextSpan(
-                text: ' 時間',
-                style: TextStyle(
-                color: Colors.black87,
-                fontSize: 16,
-                ),
-                ),
-                ]
-                ),
-                Padding( // いいね数
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                children: [
-                Icon(
-                Icons.favorite,
-                color: Colors.pink,
-                ),
-                Text('100')
                 ],
-                ),
-                )
-                ],
-                ),
-                ),
-                ),
-                ],
-                ),
-                ),
+              ),
+            ),
 
-                // ボタン
-                timerfinish ? ElevatedButton(
-                onPressed: () {
-                deleteUsers(widget.documentId);
+            // ボタン
+            timerfinish ? ElevatedButton(
+              onPressed: () {
                 Navigator.pop(context);
-                },
-                child: Text('記録する'),
-                ) : ElevatedButton(
-                onPressed: () {
-                deleteUsers(widget.documentId);
+              },
+              child: Text('記録する'),
+            ) : ElevatedButton(
+              onPressed: () {
                 Navigator.pop(context);
-                },
-                child: Text('戻る'),
-                ),
+              },
+              child: Text('戻る'),
+            ),
 
-                // 他の部屋に入っているユーザー表示部分
-                StreamBuilder<QuerySnapshot>(
-                stream: rooms.doc(widget.documentId).collection('users').snapshots(),
+            // 他の部屋に入っているユーザー表示部分
+            StreamBuilder<QuerySnapshot>(
+                stream: rooms.doc(widget.documentId).collection('users').orderBy('inTime').snapshots(),
                 builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
 
-                if (snapshot.hasError) {
-                return Text('Something went wrong');
-                }
+                  if (snapshot.hasError) {
+                    return Text('Something went wrong');
+                  }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                print('waiting');
-                }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    print('waiting');
+                  }
 
-                return Expanded(
-                child: SafeArea(
-                child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GridView.count(
-                // width: MediaQuery.of(context).size.width * 0.8,
-                crossAxisCount: 3, // 1行に表示する数
-                crossAxisSpacing: 4, // 縦スペース
-                mainAxisSpacing: 4, // 横スペース
-                shrinkWrap: true,
-                children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GridView.count(
+                        crossAxisCount: 3, // 1行に表示する数
+                        crossAxisSpacing: 4.0, // 縦スペース
+                        mainAxisSpacing: 4.0, // 横スペース
+                        shrinkWrap: true,
+                        children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                          Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
 
-                return Container(
-                // padding: const EdgeInsets.all(8.0),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                color: Colors.blue[100],
-                ),
-                child:GridTile(
-                child: Container(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                children: [
-                Text(
-                data['name'],
-                ),
-                Text(
-                data['good'],
-                ),
-                ],
-                ),
-                ),
-
-                // いいね部分
-                footer: IconButton(
-                alignment: Alignment.bottomRight,
-                icon: const Icon(
-                Icons.favorite,
-                color: Colors.pink,
-                ),
-                onPressed: (){
-                updateGood(document.id, int.parse(data['good']));
-                ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('いいねを押しました')),
-                );
-                },
-                )
-                ));
-                }).toList(),
-                ),
-                ),
-                ),
-                );
-                }
-                ),
-                );
-                } else {
-                return Center(child: CircularProgressIndicator(),);
-                }
-              }
-          ),
-
-          // 部屋に入っているユーザー表示
-          StreamBuilder(
-              stream: Firestore.roomRef.doc(widget.documentId).collection('users').snapshots(),
-              builder: (context, snapshot) {
-                return FutureBuilder(
-                  future: createUsers(),
-                  builder: (context, snapshot) {
-                    // if(snapshot.connectionState == ConnectionState.done) {
-                    return Flexible(
-                      child: Column(
-                        children: [
-                          // 部屋の人数
-                          Text(
-                            inRoomUserNum.toString() + '人があなたと一緒に勉強しています。',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                            ),
-                          ),
-                          // AnimatedSwitcher, これではできない。再読み込みではなく、animatedListのようなlistで管理しなければanimationができないと思われる。
-                          // duration: Duration(milliseconds: 5000),
-                          //   key: ValueKey<int>(inRoomUserList.length),
-                          //   transitionBuilder: (Widget child, Animation<double> animation) => ScaleTransition(
-                          //     child: child,
-                          //     scale: animation), // .drive(Tween<double>(begin: 0.2, end: 1),)
-                          Flexible(
-                            child: GridView.builder(
-                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 4
-                                ),
-                                itemCount: inRoomUserList.length,
-                                itemBuilder: (context, index) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      // いいね処理
-                                    },
+                          return Container(
+                            // padding: const EdgeInsets.all(8.0),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: Colors.blue[100],
+                              ),
+                              child:GridTile(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Column(
                                       children: [
-                                        CircleAvatar(
-                                          backgroundColor: Colors.blue,
-                                          radius: 37,
-                                          child: CircleAvatar(
-                                            backgroundImage: NetworkImage(inRoomUserList[index].imagePath),
-                                            radius: 35,
-                                          ),
+                                        Text(
+                                          data['name'],
                                         ),
                                         Text(
-                                          inRoomUserList[index].name,
+                                          data['good'],
                                         ),
                                       ],
                                     ),
-                                  );
-                                }
-                            ),
-                          ),
-                        ],
+                                  ),
+
+                                  // いいね部分
+                                  footer: IconButton(
+                                    alignment: Alignment.bottomRight,
+                                    icon: const Icon(
+                                      Icons.favorite,
+                                      color: Colors.pink,
+                                    ),
+                                    onPressed: (){
+                                      updateGood(document.id, int.parse(data['good']));
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('いいねを押しました')),
+                                      );
+                                    },
+                                  )
+                              ));
+                        }).toList(),
                       ),
-                    );
-                    // } else {
-                    //   return Center(child: CircularProgressIndicator(),);
-                    // }
-                  },
-                );
-              }
-          ),
-        ],
+                    ),
+                  );
+                }
+            ),
+          ],
+        ),
       ),
     );
   }
