@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_countdown_timer/index.dart';
 import 'package:study_with_us_test/pages/measure_study/ten_minutes.dart';
 import 'package:study_with_us_test/pages/measure_study/thirty_minutes.dart';
 

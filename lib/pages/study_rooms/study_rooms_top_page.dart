@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:study_with_us_test/pages/study_rooms/add_study_room.dart';
 import 'package:study_with_us_test/pages/study_rooms/study_page.dart';
+import 'package:study_with_us_test/utils/firebase.dart';
+import 'package:study_with_us_test/utils/shared_prefs.dart';
 
 
 // 勉強部屋一覧画面
@@ -37,26 +39,6 @@ class _StudyRoomsState extends State<StudyRooms> {
     });
   }
 
-  // 部屋にはいれるかどうか　入れなくなったらモデルのroomInをfalseに変更
-  Future<void> updateRoomIn(documentId, roomIn) {
-    return rooms
-        .doc(documentId)
-        .update({'roomIn': roomIn })
-        .then((value) => print("User Updated"))
-        .catchError((error) => print("Failed to update user: $error"));
-  }
-
-  // rooms > 部屋のドキュメント > 値・usersのコレクション
-  Future<void> addUsers(roomDocumentId, userDocumentId){
-    return rooms
-        .doc(roomDocumentId)
-        .collection('users')
-        .doc(userDocumentId)
-        .set({'inTime': Timestamp.now(), 'name': 'username', 'good': '0'})
-        .then((value) => print("User Updated"))
-        .catchError((error) => print("Failed to update user: $error"));
-  }
-
   @override
   void initState() {
     batchDelete();
@@ -66,17 +48,14 @@ class _StudyRoomsState extends State<StudyRooms> {
   // 時間が終了しているかいなか
   bool roomIn = true;
 
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
         stream: _roomsStream,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-
         if (snapshot.hasError) {
           return Text('Something went wrong');
         }
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
@@ -93,7 +72,7 @@ class _StudyRoomsState extends State<StudyRooms> {
                 //   },
                 // ),
 
-                // プラスボタン　ここから部屋を新しく作れる
+                // プラスボタン ここから部屋を新しく作れる
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: IconButton(
@@ -107,7 +86,6 @@ class _StudyRoomsState extends State<StudyRooms> {
                   ),
                 ),
               ],
-
               // タブバー
               bottom: TabBar(
                 tabs: [
@@ -138,7 +116,7 @@ class _StudyRoomsState extends State<StudyRooms> {
                       if (time <= 0) {
                         // 終了済み ＝ 入れない
                         roomIn = false;
-                        updateRoomIn(document.id, roomIn);
+                        Firestore.updateRoomIn(document.id, roomIn);
                       } else {
                         roomIn = true;
                       }
@@ -146,7 +124,6 @@ class _StudyRoomsState extends State<StudyRooms> {
                       return Card(
                           child: ListTile(
                             tileColor: data['roomIn'] ? Colors.white : Colors.black12,
-
                             // 部屋のタイトル
                             title: Container(
                               padding: EdgeInsets.all(8),
@@ -199,12 +176,11 @@ class _StudyRoomsState extends State<StudyRooms> {
                             onTap: (){
                               // roomInがTrueであれば入ることができる
                               if (data['roomIn']) {
-
                                 // 部屋に入る人をrooms>usersにセットする
-                                addUsers(document.id, 'gt5ZarnI57RmGqsiMQxi1msjqxp2');
-
+                                final myUid = SharedPrefs.getUid();
+                                Firestore.addUsers(document.id, myUid);
                                 Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id),
+                                  builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id, myUid),
                                 ));
                               }
                             },
@@ -226,7 +202,7 @@ class _StudyRoomsState extends State<StudyRooms> {
                       if (time <= 0) {
                         // 終了済み ＝ 入れない
                         roomIn = false;
-                        updateRoomIn(document.id, roomIn);
+                        Firestore.updateRoomIn(document.id, roomIn);
                       } else {
                         roomIn = true;
                       }
@@ -318,9 +294,10 @@ class _StudyRoomsState extends State<StudyRooms> {
                                         onPressed: () async {
                                           if (data['roomIn']) {
                                             if (_formKey.currentState!.validate()) {
-                                              await addUsers(document.id, 'gt5ZarnI57RmGqsiMQxi1msjqxp2');
+                                              final myUid = SharedPrefs.getUid();
+                                              await Firestore.addUsers(document.id, myUid);
                                               Navigator.push(context, MaterialPageRoute(
-                                                builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id),
+                                                builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id, myUid),
                                               ));
                                             }
                                           }

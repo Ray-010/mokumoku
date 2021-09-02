@@ -1,8 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:study_with_us_test/pages/check_user_account.dart';
-import 'package:study_with_us_test/pages/login_authentication/login.dart';
-import 'package:study_with_us_test/root.dart';
 import 'package:study_with_us_test/utils/shared_prefs.dart';
 
 void main() async{
@@ -24,7 +22,7 @@ class MyApp extends StatelessWidget {
         // primaryColor: Colors.blue,
         scaffoldBackgroundColor: Colors.grey[50],
       ),
-      home: LoginPage(),
+      home: CheckAccount(),
     );
   }
 }

@@ -1,54 +1,125 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:study_with_us_test/model/user.dart';
+import 'package:study_with_us_test/model/user_room/room_model.dart';
 import 'package:study_with_us_test/utils/shared_prefs.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 
 class Firestore {
   static FirebaseFirestore _firestoreInstance = FirebaseFirestore.instance;
   static final userRef = _firestoreInstance.collection('users');
-
-  // final FirebaseAuth auth = FirebaseAuth.instance;
+  static final roomRef = _firestoreInstance.collection('rooms');
   
 
   // SignUp
   static Future signUp(String email, uid) async {
-    _firestoreInstance.collection('users').doc(uid).set({
-      'name': 'ゲスト',
-      'imagePath': 'imagePath',
-      'email': email,
-      'createdAt': Timestamp.now(),
-    });
-    await SharedPrefs.setUid(uid); // 端末保存
+    try {
+      _firestoreInstance.collection('users').doc(uid).set({
+        'name': 'ゲスト',
+        'imagePath': 'https://www.silhouette-illust.com/wp-content/uploads/2017/10/jinbutsu_male_40219-300x300.jpg',
+        'email': email,
+        'favorite': 0,
+        'createdAt': Timestamp.now(),
+      });
+      await SharedPrefs.setUid(uid); // 端末保存
+
+    } catch(e) {
+      print('アカウント作成に失敗しました --- $e');
+    }
   }
-
-  // Sign in User
-
-
-  // Reset Password
-
-
-
-  // Sign Out
-
-
-  // get user information
-  // static Future<User> getUserProfile(String uid) async {
-  //   try {
-
-  //   } catch(e) {
-  //     print('取得失敗 --- $e');
-  //     return null;
-  //   }
-  // }
 
   // ユーザ情報取得
   static Future<UserProfileModel> getProfile(String uid) async {
     final profile = await userRef.doc(uid).get();
     UserProfileModel myProfile = UserProfileModel(
       name: profile.data()?['name'], 
-      imagePath: profile.data()?['imagePath'], 
+      imagePath: profile.data()?['imagePath'],
+      favorite: profile.data()!['favorite'],
       uid: uid,
     );
     return myProfile;
+  }
+  
+  
+  // rooms > 部屋のドキュメント > 値・usersのコレクション
+  // 部屋に入るときにroomsのusersにuserを追加
+  static Future<void> addUsers(roomId, userDocumentId) async {
+    return roomRef
+      .doc(roomId)
+      .collection('users')
+      .doc(userDocumentId)
+      .set({'inTime': Timestamp.now(), 'inRoom': true, 'favorite': 0})
+      .then((value) => print("User Updated"))
+      .catchError((error) => print("Failed to update user: $error"));
+  }
+  
+  // 退出→user情報更新
+  static Future<void> getOutRoom(roomDocumentId, userDocumentId) {
+    // final getOutTime = Timestamp.now();
+    // final userStudyResult = roomRef.doc(roomDocumentId).collection('users').doc(userDocumentId);
+    // final userProfile = getProfile(userDocumentId);
+    return roomRef
+        .doc(roomDocumentId)
+        .collection('users')
+        .doc(userDocumentId)
+        .update({'inRoom': false});
+    // return updateUserstudyResult(getOutTime, userStudyResult, userProfile);
+  }
+  // // ユーザ情報更新
+  // static Future<void> updateUserstudyResult(getOutTime, userStudyResult, userProfile) {
+  //   return _firestoreInstance.doc(userProfile.uid).update(
+  //     favorite: 
+  //   );
+  // }
+
+
+  // 部屋にはいれるかどうか 入れなくなったらモデルのroomInをfalseに変更
+  static Future<void> updateRoomIn(documentId, roomIn) {
+    return roomRef
+        .doc(documentId)
+        .update({'roomIn': roomIn })
+        .then((value) => print("User Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
+  }
+
+  // 部屋に入っているユーザ取得
+  static Future<List> getUsers(String roomId, String myUid, List inRoomUserList) async {
+    final getRoomUsers = roomRef.doc(roomId).collection('users');
+    final snapshot = await getRoomUsers.get();
+    // if(inRoomUserList.length == 0) {
+    List roomUsersList = [];
+    await Future.forEach(snapshot.docs, (QueryDocumentSnapshot<Map<String, dynamic>> doc) async {
+      var user = await getRoomUsers.doc(doc.id).get();
+      bool userInRoom = user.data()!['inRoom'];
+      if(doc.id != myUid && userInRoom) {
+        UserProfileModel user = await getProfile(doc.id);
+        RoomUser userProfile = RoomUser(
+          name: user.name,
+          favorite: user.favorite,
+          imagePath: user.imagePath,
+        );
+        // roomUsersList.add(doc.id);
+        roomUsersList.add(userProfile);
+      }
+    });
+    return roomUsersList;
+    // } else {
+    //   await Future.forEach(snapshot.docs, (QueryDocumentSnapshot<Map<String, dynamic>> doc) async {
+    //     var user = await getRoomUsers.doc(doc.id).get();
+    //     var number = 0;
+    //     bool userInRoom = user.data()!['inRoom'];
+    //     // inRoomUserListはuserProfileのリスト, uidのみで構成されたリストを作り、それに含まれるかどうかを判定する
+    //     if(doc.id != myUid && snapshot.docs.toList().contains(doc.id) && userInRoom) { // inRoomUserListに追加処理
+    //       UserProfileModel user = await getProfile(doc.id);
+    //       RoomUser userProfile = RoomUser(
+    //         name: user.name,
+    //         favorite: user.favorite,
+    //         imagePath: user.imagePath,
+    //       );
+    //       inRoomUserList.add(userProfile);
+    //     } else if(doc.id != myUid && !userInRoom) { // 退出者の処理
+    //       // inRoomUserList.remove(doc.id);
+    //     }
+    //   });
+    //   return inRoomUserList;
+    // }
   }
 }
