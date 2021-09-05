@@ -10,7 +10,15 @@ class TimerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('計測'),),
+      appBar: AppBar(
+        title: Text(
+          'タイマー',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           SizedBox(height: 30.0),
@@ -103,7 +111,7 @@ class TimerPage extends StatelessWidget {
                           }, 
                           icon: Icon(Icons.settings_backup_restore_rounded),
                           iconSize: 50.0,
-                          color: Theme.of(context).primaryColor,
+                          color: Colors.blue,
                         ),
                         IconButton(
                           onPressed: (){
@@ -111,7 +119,7 @@ class TimerPage extends StatelessWidget {
                           }, 
                           icon: model.started ? Icon(Icons.play_arrow) : Icon(Icons.pause),
                           iconSize: 50.0,
-                          color: Theme.of(context).primaryColor,
+                          color: Colors.blue,
                         ),
                       ],
                     ),

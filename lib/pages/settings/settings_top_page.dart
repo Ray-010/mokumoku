@@ -91,23 +91,23 @@ class CheckBoxListTileModel {
     return <CheckBoxListTileModel>[
       CheckBoxListTileModel(
           userId: 1,
-          title: "Android",
+          title: "ハッカソン優勝！！",
           isCheck: true),
       CheckBoxListTileModel(
           userId: 2,
-          title: "Flutter",
+          title: "基本情報　取得",
           isCheck: false),
       CheckBoxListTileModel(
           userId: 3,
-          title: "IOS",
+          title: "Flutter理解",
           isCheck: false),
       CheckBoxListTileModel(
           userId: 4,
-          title: "PHP",
+          title: "マッチョになる",
           isCheck: false),
       CheckBoxListTileModel(
           userId: 5,
-          title: "Node",
+          title: "東大合格",
           isCheck: false),
     ];
   }

@@ -9,7 +9,13 @@ class Review extends StatelessWidget {
     final double deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text('振り返り'),
+        title: Text(
+          '振り返り',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -65,7 +71,7 @@ class Review extends StatelessWidget {
                                 iconSize: deviceWidth >= 420 ? 70 : deviceWidth / 6,
                                 icon: Icon(
                                   Icons.sentiment_very_satisfied_outlined,
-                                  color: model.great ? Colors.red : Colors.blue,
+                                  color: model.great ? Colors.blue : Colors.blue[100],
                                 ),
                                 onPressed: () {
                                   model.checkedGreat();
@@ -82,7 +88,7 @@ class Review extends StatelessWidget {
                                 iconSize: deviceWidth >= 420 ? 70 : deviceWidth / 6,
                                 icon: Icon(
                                   Icons.sentiment_satisfied_outlined,
-                                  color: model.good ? Colors.red : Colors.blue,
+                                  color: model.good ? Colors.blue : Colors.blue[100],
                                 ),
                                 onPressed: (){
                                   model.checkedGood();
@@ -99,7 +105,7 @@ class Review extends StatelessWidget {
                                 iconSize: deviceWidth >= 420 ? 70 : deviceWidth / 6,
                                 icon: Icon(
                                   Icons.sentiment_neutral_outlined,
-                                  color: model.fine? Colors.red : Colors.blue,
+                                  color: model.fine ? Colors.blue : Colors.blue[100],
                                 ),
                                 onPressed: (){
                                   model.checkedFine();
@@ -116,7 +122,7 @@ class Review extends StatelessWidget {
                                 iconSize: deviceWidth >= 420 ? 70 : deviceWidth / 6,
                                 icon: Icon(
                                   Icons.sentiment_very_dissatisfied_outlined,
-                                  color: model.bad ? Colors.red : Colors.blue,
+                                  color: model.bad ? Colors.blue : Colors.blue[100],
                                 ),
                                 onPressed: (){
                                   model.checkedBad();

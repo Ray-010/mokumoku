@@ -117,37 +117,37 @@ class _StudyPageState extends State<StudyPage> {
                                 ),
                               ),
                             ),
-                            Padding( // 総勉強時間
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: '総勉強時間: ',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: '10',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: ' 時間',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ]
-                                ),
-                              ),
-                            ),
+                            // Padding( // 総勉強時間
+                            //   padding: const EdgeInsets.only(left: 8.0),
+                            //   child: RichText(
+                            //     text: TextSpan(
+                            //       children: [
+                            //         TextSpan(
+                            //           text: '総勉強時間: ',
+                            //           style: TextStyle(
+                            //             color: Colors.black87,
+                            //             fontSize: 16,
+                            //           ),
+                            //         ),
+                            //         TextSpan(
+                            //           text: '10',
+                            //           style: TextStyle(
+                            //             color: Colors.black,
+                            //             fontSize: 22,
+                            //             fontWeight: FontWeight.bold,
+                            //           ),
+                            //         ),
+                            //         TextSpan(
+                            //           text: ' 時間',
+                            //           style: TextStyle(
+                            //             color: Colors.black87,
+                            //             fontSize: 16,
+                            //           ),
+                            //         ),
+                            //       ]
+                            //     ),
+                            //   ),
+                            // ),
                             // いいね数
                             Padding(
                               padding: const EdgeInsets.all(8.0),
