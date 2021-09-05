@@ -40,7 +40,13 @@ class _AddStudyRoomPageState extends State<AddStudyRoomPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('新規作成'),
+        centerTitle: true,
+        title: Text(
+          '新規作成',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Center(

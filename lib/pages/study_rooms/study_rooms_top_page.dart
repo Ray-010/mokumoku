@@ -88,6 +88,14 @@ class _StudyRoomsState extends State<StudyRooms> {
               ],
               // タブバー
               bottom: TabBar(
+                labelColor: Colors.blue,
+                labelStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+                unselectedLabelColor: Colors.grey,
+                unselectedLabelStyle: TextStyle(
+                  fontWeight: FontWeight.normal,
+                ),
                 tabs: [
                   Tab(
                     // icon: Icon(Icons.android),
@@ -99,7 +107,13 @@ class _StudyRoomsState extends State<StudyRooms> {
                   ),
                 ],
               ),
-              title: Text('勉強部屋'),
+              title: Text(
+                '勉強部屋',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              centerTitle: true,
             ),
             body: TabBarView(
               children: [
@@ -267,14 +281,13 @@ class _StudyRoomsState extends State<StudyRooms> {
                                   child: AlertDialog(
                                     title: Text('『' + data['title'] + '』部屋'),
                                     content: TextFormField(
-                                      autofocus: true,
                                       maxLines: 5,
                                       // controller: titleController,
                                       style: TextStyle(
                                         fontSize: 20,
                                       ),
                                       decoration: InputDecoration(
-                                        hintText: "例：テキスト１ページ終わらせる！",
+                                        hintText: "入室してやることを宣言しよう！",
                                         border: OutlineInputBorder(),
                                       ),
                                       validator: (value) {
@@ -285,23 +298,57 @@ class _StudyRoomsState extends State<StudyRooms> {
                                       },
                                     ),
                                     actions: [
-                                      TextButton(
-                                        child: Text("キャンセル"),
-                                        onPressed: () => Navigator.pop(context),
-                                      ),
-                                      TextButton(
-                                        child: Text("入室する"),
-                                        onPressed: () async {
-                                          if (data['roomIn']) {
-                                            if (_formKey.currentState!.validate()) {
-                                              final myUid = SharedPrefs.getUid();
-                                              await Firestore.addUsers(document.id, myUid);
-                                              Navigator.push(context, MaterialPageRoute(
-                                                builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id, myUid),
-                                              ));
-                                            }
-                                          }
-                                        },
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                    primary: Colors.white, //ボタンの背景色
+                                                    side: BorderSide(
+                                                      color: Colors.blue, //枠線!
+                                                      width: 1, //枠線！
+                                                    ),
+                                                  ),
+                                                  onPressed: (){
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text(
+                                                    'キャンセル',
+                                                    style: TextStyle(
+                                                      color: Colors.blue,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: ElevatedButton(
+                                                  onPressed: () async {
+                                                    if (data['roomIn']) {
+                                                      if (_formKey.currentState!.validate()) {
+                                                        final myUid = SharedPrefs.getUid();
+                                                        await Firestore.addUsers(document.id, myUid);
+                                                        Navigator.pop(context);
+                                                        Navigator.push(context, MaterialPageRoute(
+                                                          builder: (context) => StudyPage(data['title'], data['finishedTime'].toDate(), data['members'], document.id, myUid),
+                                                        ));
+                                                      }
+                                                    }
+                                                  },
+                                                  child: Text('入室する'),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
