@@ -35,7 +35,7 @@ class _SignUpState extends State<SignUp> {
         ),
         centerTitle: true,
         title: Text(
-          'Sign up',
+          '新規登録',
           style: TextStyle(
             color: Colors.black54,
             fontSize: 24.0,
@@ -43,21 +43,37 @@ class _SignUpState extends State<SignUp> {
           ),
         ),
         brightness: Brightness.light,
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Colors.lightBlueAccent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height-80,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          color: Colors.lightBlueAccent,
           child: Column(
             children: [
-              SizedBox(height: 40,),
+              SizedBox(height: 20,),
               Container(
+                child:  CircleAvatar(
+                  // backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: Colors.white,
+                  radius: MediaQuery.of(context).size.width / 4.5,
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage('images/Icon.png'),
+                    radius: MediaQuery.of(context).size.width / 5,
+                  ),
+                ),
+              ),
+
+              Container(
+                padding: EdgeInsets.all(8.0),
                 alignment: Alignment.center,
                 child: Text(
-                  'Welcome\nStudy with Us',
+                  'MokuMokuヘ\nようこそ',
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 30.0,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
@@ -68,32 +84,31 @@ class _SignUpState extends State<SignUp> {
               Container(
                 alignment: Alignment.center,
                 child: Text(
-                  'Sign up with your email and password \nor continue with social media',
+                  'みんなともくもく勉強しよう！',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.0,
                   ),
                 ),
               ),
-              SizedBox(height: 40,),
+              SizedBox(height: 20,),
+
               // メールアドレス入力
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-                child: TextField(
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+                child: TextFormField(
                   controller: mailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(vertical: 20.0),
                     fillColor: Colors.white,
                     filled: true,
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
+                    hintText: 'メールアドレス',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(26.0)
+                        borderRadius: BorderRadius.circular(10.0)
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(26.0)
+                        borderRadius: BorderRadius.circular(10.0)
                     ),
                     prefixIcon: Icon(
                       Icons.mail,
@@ -107,9 +122,12 @@ class _SignUpState extends State<SignUp> {
                   },
                 ),
               ),
+
+
+              // パスワード入力
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-                child: TextField(
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+                child: TextFormField(
                   controller: passwordController,
                   obscureText: true,
                   maxLength: 20,
@@ -118,14 +136,13 @@ class _SignUpState extends State<SignUp> {
                     contentPadding: EdgeInsets.symmetric(vertical: 20.0),
                     fillColor: Colors.white,
                     filled: true,
-                    labelText: 'Password',
-                    hintText: 'Password ( 8 ~ 20 letters )',
+                    hintText: 'パスワード ( 8 ~ 20 文字 )',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(26.0)
+                        borderRadius: BorderRadius.circular(10.0)
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(26.0)
+                        borderRadius: BorderRadius.circular(10.0)
                     ),
                     prefixIcon: Icon(
                       Icons.lock,
@@ -144,17 +161,7 @@ class _SignUpState extends State<SignUp> {
                   },
                 ),
               ),
-              // ログイン失敗時のエラーメッセージ
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-                child: Text(
-                  _infoText,
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-              SizedBox(height: 40,),
+
               // ユーザ登録ボタン
               GestureDetector(
                 onTap: () {
@@ -179,23 +186,37 @@ class _SignUpState extends State<SignUp> {
                   }
                 }, 
                 child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 60.0),
-                  height: 45,
+                  margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
                   alignment: Alignment.center,
+                  height: 45.0,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15.0),
-                    color: Theme.of(context).primaryColor,
+                      color: Colors.deepOrange[400],
+                      borderRadius: BorderRadius.circular(10.0)
                   ),
                   child: Text(
-                    'Sign up',
+                    'SIGN UP',
                     style: TextStyle(
-                      color: Colors.white,
                       fontSize: 22.0,
-                      letterSpacing: 2.0
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 2.0,
                     ),
                   ),
                 ),
               ),
+
+
+              // ログイン失敗時のエラーメッセージ
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                child: Text(
+                  _infoText,
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+              SizedBox(height: 40,),
             ],
           ),
         ),

@@ -26,7 +26,13 @@ class _UserProfileState extends State<UserProfile> {
     return Scaffold(
       appBar:AppBar(
         automaticallyImplyLeading: false,
-        title: Text('プロフィール'),
+        title: Text(
+          'プロフィール',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -46,96 +52,105 @@ class _UserProfileState extends State<UserProfile> {
             return Column(
               children: [
                 // プロフィール
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // アイコン画像
-                      Container(
-                        child:  CircleAvatar(
-                          // backgroundColor: Theme.of(context).primaryColor,
-                          backgroundColor: Colors.blue,
-                          radius: 53,
-                          child: CircleAvatar(
-                            backgroundImage: NetworkImage(userInfo.imagePath),
-                            radius: 50,
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // アイコン画像
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            child:  CircleAvatar(
+                              // backgroundColor: Theme.of(context).primaryColor,
+                              backgroundColor: Colors.blue,
+                              radius: MediaQuery.of(context).size.width / 7,
+                              child: CircleAvatar(
+                                backgroundImage: NetworkImage(userInfo.imagePath),
+                                radius: MediaQuery.of(context).size.width / 8,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      // アイコン右ユーザ詳細
-                      Container(
-                        // color: Colors.indigo,
-                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 名前
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                userInfo.name,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Padding( // 総勉強時間
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: '総勉強時間: ',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: '10',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: ' 時間',
-                                      style: TextStyle(
-                                        color: Colors.black87,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ]
-                                ),
-                              ),
-                            ),
-                            // いいね数
-                            Padding( 
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.favorite,
-                                    color: Colors.pink,
-                                  ),
-                                  Text(
-                                    userInfo.favorite.toString(),
+                        // アイコン右ユーザ詳細
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            // color: Colors.indigo,
+                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 名前
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    userInfo.name,
                                     style: TextStyle(
-                                      fontSize: 16.0,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        )
-                      ),
-                    ],
+                                ),
+                                Padding( // 総勉強時間
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: '総勉強時間: ',
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '10',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: ' 時間',
+                                          style: TextStyle(
+                                            color: Colors.black87,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ]
+                                    ),
+                                  ),
+                                ),
+                                // いいね数
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.favorite,
+                                        color: Colors.pink,
+                                      ),
+                                      Text(
+                                        userInfo.favorite.toString(),
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                Text('GitHub 草生やす'),
               ],
             );
           } else {

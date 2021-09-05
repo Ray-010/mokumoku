@@ -30,7 +30,9 @@ class _TodoListPageState extends State<TodoListPage> {
         centerTitle: true,
         title: new Text(
           '目標リスト',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: new ListView.builder(
