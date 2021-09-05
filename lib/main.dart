@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:study_with_us_test/pages/check_user_account.dart';
-import 'package:study_with_us_test/pages/login_authentication/animation_login.dart';
 import 'package:study_with_us_test/pages/login_authentication/login.dart';
 import 'package:study_with_us_test/pages/login_authentication/icon_top_page.dart';
 import 'package:study_with_us_test/utils/shared_prefs.dart';
@@ -25,8 +24,8 @@ class MyApp extends StatelessWidget {
         // primaryColor: Colors.blue,
         scaffoldBackgroundColor: Colors.grey[50],
       ),
+
       home: IconTopPage(),
-      // home: AnimationLogin(),
     );
   }
 }
