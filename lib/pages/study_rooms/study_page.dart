@@ -45,7 +45,27 @@ class _StudyPageState extends State<StudyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('『' + widget.title + '』部屋'),
+        title:  RichText(
+          text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '『' + widget.title + '』',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: '部屋',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 20,
+                  ),
+                ),
+              ]
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -59,86 +79,96 @@ class _StudyPageState extends State<StudyPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     // アイコン画像
-                    Container(
-                      child:  CircleAvatar(
-                        // backgroundColor: Theme.of(context).primaryColor,
-                        backgroundColor: Colors.blue,
-                        radius: 53,
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage(userInfo.imagePath),
-                          radius: 50,
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top:16.0),
+                        child: Container(
+                          padding: EdgeInsets.all(8.0),
+                          child:  CircleAvatar(
+                            // backgroundColor: Theme.of(context).primaryColor,
+                            backgroundColor: Colors.blue,
+                            radius: MediaQuery.of(context).size.width / 7,
+                            child: CircleAvatar(
+                              backgroundImage: NetworkImage(userInfo.imagePath),
+                              radius: MediaQuery.of(context).size.width / 8,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                     // アイコン右ユーザ詳細
-                    Container(
-                      // color: Colors.indigo,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 名前
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              userInfo.name,
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        // color: Colors.indigo,
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 名前
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                userInfo.name,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          Padding( // 総勉強時間
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: RichText(
-                              text: TextSpan(
+                            Padding( // 総勉強時間
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '総勉強時間: ',
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '10',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: ' 時間',
+                                      style: TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ]
+                                ),
+                              ),
+                            ),
+                            // いいね数
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
                                 children: [
-                                  TextSpan(
-                                    text: '総勉強時間: ',
+                                  Icon(
+                                    Icons.favorite,
+                                    color: Colors.pink,
+                                  ),
+                                  Text(
+                                    userInfo.favorite.toString(),
                                     style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 16,
+                                      fontSize: 16.0,
                                     ),
                                   ),
-                                  TextSpan(
-                                    text: '10',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: ' 時間',
-                                    style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ]
+                                ],
                               ),
                             ),
-                          ),
-                          // いいね数
-                          Padding( 
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.favorite,
-                                  color: Colors.pink,
-                                ),
-                                Text(
-                                  userInfo.favorite.toString(),
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      )
+                          ],
+                        )
+                      ),
                     ),
                   ],
                 ),
@@ -161,10 +191,13 @@ class _StudyPageState extends State<StudyPage> {
                       child: Column(
                         children: [
                           // 部屋の人数
-                          Text(
-                            inRoomUserNum.toString() + '人があなたと一緒に勉強しています。',
-                            style: TextStyle(
-                              fontSize: 16.0,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 30.0),
+                            child: Text(
+                              inRoomUserNum.toString() + '人があなたと一緒に勉強しています。',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                              ),
                             ),
                           ),
                           // AnimatedSwitcher, これではできない。再読み込みではなく、animatedListのようなlistで管理しなければanimationができないと思われる。
@@ -176,29 +209,52 @@ class _StudyPageState extends State<StudyPage> {
                           Flexible(
                             child: GridView.builder(
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4
+                                crossAxisCount: 3
                               ),
                               itemCount: inRoomUserList.length,
                               itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    // いいね処理
-                                  },
-                                  child: Column(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: Colors.blue,
-                                        radius: 37,
-                                        child: CircleAvatar(
-                                          backgroundImage: NetworkImage(inRoomUserList[index].imagePath),
-                                          radius: 35,
-                                        ),
+                                return Column(
+                                  children: [
+                                    SizedBox(
+                                      height: MediaQuery.of(context).size.width / 4,
+                                      width: MediaQuery.of(context).size.width / 4,
+                                      child: Stack(
+                                        children: <Widget>[
+                                          Container(
+                                            alignment: Alignment.topCenter,
+                                            child: CircleAvatar(
+                                              backgroundColor: Colors.blue,
+                                              radius: MediaQuery.of(context).size.width / 8.5,
+                                              child: CircleAvatar(
+                                                backgroundImage: NetworkImage(inRoomUserList[index].imagePath),
+                                                radius: MediaQuery.of(context).size.width / 9.5,
+                                              ),
+                                            ),
+                                          ),
+                                        Container(
+                                          alignment: Alignment.bottomRight,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              // いいね処理
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(content: Text('いいねを押しました')),
+                                              );
+                                            },
+                                            child: Container(
+                                              child: Icon(
+                                                  Icons.favorite,
+                                                  color: Colors.pink,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        inRoomUserList[index].name,
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                    Text(
+                                      inRoomUserList[index].name,
+                                    ),
+                                  ],
                                 );
                               }
                             ),

@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:study_with_us_test/pages/login_authentication/authentication_error.dart';
-import 'package:study_with_us_test/pages/login_authentication/sign_up.dart';
 
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -35,7 +34,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         // ),
         centerTitle: true,
         title: Text(
-          'Forgot Password',
+          'パスワードをリセット',
           style: TextStyle(
             color: Colors.black54,
             fontSize: 24.0,
@@ -43,55 +42,61 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           ),
         ),
         brightness: Brightness.light,
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Colors.lightBlueAccent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height-80,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          color: Colors.lightBlueAccent,
           child: Column(
             children: [
               SizedBox(height: 60,),
               Container(
                 alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Text(
-                  'Forgot Password',
+                  'パスワードを\nお忘れの方へ',
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 30.0,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
                   )
                 ),
               ),
+
               SizedBox(height: 10.0,),
+
               Container(
                 alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
                 child: Text(
-                  'Please enter your email and we will send \nyou a link to return to your account',
+                  'ご登録いただいているメールアドレスをご入力ください。'
+                      'そちらのメールアドレスへパスワード発行URLをお送りいたします。',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16.0,
                   ),
                 ),
               ),
-              SizedBox(height: 80.0,),
+              SizedBox(height: 30.0,),
 
               // メールアドレス入力
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
                 child: TextFormField(
                   decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(vertical: 20.0),
                     fillColor: Colors.white,
                     filled: true,
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
+                    hintText: 'メールアドレス',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(26.0)
+                        borderRadius: BorderRadius.circular(10.0)
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(26.0)
+                        borderRadius: BorderRadius.circular(10.0)
                     ),
                     prefixIcon: Icon(
                       Icons.mail,
@@ -105,7 +110,36 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   },
                 ),
               ),
-              
+
+              // パスワードリセットメール送信ボタン
+              GestureDetector(
+                onTap: () {
+                  try {
+                    auth.sendPasswordResetEmail(email: _email);
+                  } catch (e) {
+                    print('メールの送信に失敗しました。');
+                  }
+                },
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+                  alignment: Alignment.center,
+                  height: 45.0,
+                  decoration: BoxDecoration(
+                      color: Colors.deepOrange[400],
+                      borderRadius: BorderRadius.circular(10.0)
+                  ),
+                  child: Text(
+                    '送信',
+                    style: TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ),
+              ),
+
               // ログイン失敗時のエラーメッセージ
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
@@ -121,57 +155,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
               ),
 
-              // パスワードリセットメール送信ボタン
-              GestureDetector(
-                onTap: () {
-                  try {
-                    auth.sendPasswordResetEmail(email: _email);
-                  } catch (e) {
-                    print('メールの送信に失敗しました。');
-                  }
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 60.0),
-                  alignment: Alignment.center,
-                  height: 45.0,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(10.0)
-                  ),
-                  child: Text(
-                    'Submit',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22.0,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-              
-              // Sign Up 遷移ボタン
-              Expanded(
-                child: Align(
-                  alignment: FractionalOffset.bottomCenter, // stick to the bottom
-                  child: GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SignUp())),
-                    child: Container(
-                      alignment: Alignment.center,
-                      color: Theme.of(context).primaryColor,
-                      height: 80.0,
-                      child: Text(
-                        'Don\'t have an account? Sign up',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w500,
-                        )
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
