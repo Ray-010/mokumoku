@@ -38,8 +38,17 @@ class Firestore {
     return myProfile;
   }
   
+  // roomに入った時、roomのfinishedtimeを取得
+  static Future getRestTime(roomId) async{
+    final roomDetail = await roomRef.doc(roomId).get();
+    final finishedTime = roomDetail.data()!['finishedTime'].toDate();
+    final DateTime nowTime = DateTime.now();
+    final restTime = finishedTime.difference(nowTime).inSeconds;
+    
+    return restTime;
+  }
   
-  // rooms > 部屋のドキュメント > 値・usersのコレクション
+  // rooms > 部屋のドキュメント > 値・usersのコレクション, 部屋のユーザについての処理
   // 部屋に入るときにroomsのusersにuserを追加
   static Future<void> addUsers(roomId, userDocumentId) async {
     return roomRef
@@ -51,6 +60,25 @@ class Firestore {
       .catchError((error) => print("Failed to update user: $error"));
   }
   
+  // ローカルで溜めて、最後で追加する処理に後で変える
+  // static Future<void> updateGood(userDocumentId, goodCount){
+  //   return roomRef
+  //       .doc(userDocumentId)
+  //       .collection('users')
+  //       .doc(userDocumentId)
+  //       .update({'good': (goodCount+1).toString()})
+  //       .then((value) => print("Good Updated"))
+  //       .catchError((error) => print("Failed to update user: $error"));
+  // }
+    // studytopPageの部屋の人数を更新する
+  // Future<void> updatePlusMembers(int before) {
+  //   return rooms
+  //       .doc(widget.documentId)
+  //       .update({'members': (before+1).toString()})
+  //       .then((value) => print("User Updated"))
+  //       .catchError((error) => print("Failed to update user: $error"));
+  // }
+
   // 退出→user情報更新
   static Future<void> getOutRoom(roomDocumentId, userDocumentId) {
     // final getOutTime = Timestamp.now();
@@ -63,13 +91,12 @@ class Firestore {
         .update({'inRoom': false});
     // return updateUserstudyResult(getOutTime, userStudyResult, userProfile);
   }
-  // // ユーザ情報更新
-  // static Future<void> updateUserstudyResult(getOutTime, userStudyResult, userProfile) {
+  // // 退出時ユーザ情報、勉強時間、いいねを更新
+  // static Future<void> updateUserstudyResult(getOutTime, userStudyResult, favorite) {
   //   return _firestoreInstance.doc(userProfile.uid).update(
   //     favorite: 
   //   );
   // }
-
 
   // 部屋にはいれるかどうか 入れなくなったらモデルのroomInをfalseに変更
   static Future<void> updateRoomIn(documentId, roomIn) {

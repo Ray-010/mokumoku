@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:study_with_us_test/model/user.dart';
+import 'package:study_with_us_test/pages/study_rooms/study_page_timer.dart';
 import 'package:study_with_us_test/utils/firebase.dart';
 import 'package:study_with_us_test/utils/shared_prefs.dart';
 
@@ -48,6 +49,7 @@ class _StudyPageState extends State<StudyPage> {
       ),
       body: Column(
         children: [
+          StudyPageTimer(widget.documentId),
           FutureBuilder(
             future: getMyUid(),
             builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {

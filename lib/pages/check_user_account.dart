@@ -33,8 +33,8 @@ class _CheckAccountState extends State<CheckAccount> {
 
   @override
   void initState() {
-    super.initState();
     checkUser();
+    super.initState();
   }
 
   @override
