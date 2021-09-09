@@ -39,35 +39,23 @@ class _VerifyPageState extends State<VerifyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        brightness: Brightness.light,
-        backgroundColor: Colors.grey[50],
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Verification',
-          style: TextStyle(
-            color: Colors.black54,
-            fontSize: 24.0,
-            letterSpacing: 2.0,
-          ),
-        ),
-      ),
       body: Scaffold(
         body: SingleChildScrollView(
           child: Container(
-          height: MediaQuery.of(context).size.height-80,
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.lightBlueAccent,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 40,),
+                SizedBox(height: 100,),
                 Container(
                   alignment: Alignment.center,
                   child: Text(
                     'Please Verify',
                     textAlign: TextAlign.center,
                     style: TextStyle(
+                      color: Colors.white,
                       fontSize: 30.0,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.5,
@@ -80,40 +68,16 @@ class _VerifyPageState extends State<VerifyPage> {
                   child: Container(
                     alignment: Alignment.center,
                     child: Text(
-                      'We sent ${user.email} a URL for verification. You have to click the URL to verify your email address within 30 minutes.\n\n Do not leave this page. Verification will be canceled',
+                      '${user.email}\nに認証URLを送信しました。確認してください。',
                       style: TextStyle(
-                        fontSize: 16.0,
+                        color: Colors.white,
+                        fontSize: 20.0,
                       ),
                     ),
                   ),
                 ),
                 SizedBox(height: 40,),
 
-                // ログイン画面に戻る
-                Expanded(
-                child: Align(
-                  alignment: FractionalOffset.bottomCenter, // stick to the bottom
-                  child: GestureDetector(
-                    onTap: () {
-                      timer.cancel();
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPage()));
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      color: Theme.of(context).primaryColor,
-                      height: 80.0,
-                      child: Text(
-                        'Back to Login Screen',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w500,
-                        )
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               ],
             ),
           ),
