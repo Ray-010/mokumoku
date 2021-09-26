@@ -12,7 +12,7 @@ class Firestore {
   // SignUp
   static Future signUp(String email, uid) async {
     try {
-      _firestoreInstance.collection('users').doc(uid).set({
+      userRef.doc(uid).set({
         'name': 'ゲスト',
         'imagePath': 'https://www.silhouette-illust.com/wp-content/uploads/2017/10/jinbutsu_male_40219-300x300.jpg',
         'email': email,
@@ -28,11 +28,13 @@ class Firestore {
 
   // ユーザ情報取得
   static Future<UserProfileModel> getProfile(String uid) async {
+    print('in getProfile');
     final profile = await userRef.doc(uid).get();
+    print(profile.data()?['name']);
     UserProfileModel myProfile = UserProfileModel(
       name: profile.data()?['name'], 
       imagePath: profile.data()?['imagePath'],
-      favorite: profile.data()!['favorite'],
+      favorite: profile.data()?['favorite'],
       uid: uid,
     );
     return myProfile;
@@ -148,5 +150,22 @@ class Firestore {
     //   });
     //   return inRoomUserList;
     // }
+  }
+
+
+  // 個別タイマー 勉強記録
+  static Future<void> keepRecordStudyTime(uid, studyTime, purpose, concentration) {
+    return userRef
+        .doc(uid)
+        .collection('studyRecord')
+        .doc()
+        .set({
+          'studyTime': studyTime, 
+          'purpose': purpose, 
+          'concentration': concentration, 
+          'createdAt': Timestamp.now()
+        })
+        .then((value) => print("User Updated"))
+        .catchError((error) => print("Failed to update user: $error"));
   }
 }
