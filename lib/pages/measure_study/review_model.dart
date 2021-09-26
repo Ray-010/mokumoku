@@ -34,5 +34,4 @@ class ReviewModel extends ChangeNotifier {
     bad = true;
     notifyListeners();
   }
-
 }

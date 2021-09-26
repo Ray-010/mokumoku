@@ -16,7 +16,9 @@ class _UserProfileState extends State<UserProfile> {
   late UserProfileModel userInfo;
 
   Future<void> getMyUid() async{
+    print('before get uid');
     String myUid = SharedPrefs.getUid();
+    print(myUid);
     userInfo = await Firestore.getProfile(myUid);
     print('getMyUid done');
   }
