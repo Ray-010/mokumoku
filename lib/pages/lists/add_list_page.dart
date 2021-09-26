@@ -1,15 +1,38 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:study_with_us_test/pages/lists/lists_top_page.dart';
+import 'package:study_with_us_test/utils/shared_prefs.dart';
 
-class AddTodoPage extends StatefulWidget {
+class AddListPage extends StatefulWidget {
   @override
-  _AddTodoPageState createState() => _AddTodoPageState();
+  _AddListPageState createState() => _AddListPageState();
 }
 
-class _AddTodoPageState extends State<AddTodoPage> {
+class _AddListPageState extends State<AddListPage> {
   final _formKey = GlobalKey<FormState>();
 
   String? dropdownValue;
 
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  TextEditingController titleController = TextEditingController();
+  TextEditingController contentController = TextEditingController();
+
+  // users>listsに目標を追加していく
+  Future<void> addList(userId) async {
+    return users
+        .doc(userId)
+        .collection('lists')
+        .add({
+          'title': titleController.text,
+          'content': contentController.text,
+          'createdTime': Timestamp.now(),
+          'completedTime': Timestamp.now(),
+          'isDone': false,
+        })
+        .then((value) => print("List Added"))
+        .catchError((error) => print("Failed to add user: $error"));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +56,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
                   padding: const EdgeInsets.all(8.0),
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: TextFormField(
+                    controller: titleController,
                     style: TextStyle(
                       fontSize: 20,
                     ),
@@ -58,13 +82,14 @@ class _AddTodoPageState extends State<AddTodoPage> {
                   padding: const EdgeInsets.all(8.0),
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: TextFormField(
+                    controller: contentController,
                     style: TextStyle(
                       fontSize: 20,
                       height: 1.5,
                     ),
                     maxLines: 5,
                     decoration: InputDecoration(
-                      labelText: "メモ",
+                      labelText: "内容",
                       // hintText: "Some Hint",
                       border: OutlineInputBorder(),
                     ),
@@ -77,13 +102,18 @@ class _AddTodoPageState extends State<AddTodoPage> {
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.8,
                     alignment: Alignment.center,
-                    child: RaisedButton(
-                      color: Theme.of(context).primaryColor,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.blue,
+                        onPrimary: Colors.white,
+                      ),
                       onPressed: () async{
                         if (_formKey.currentState!.validate()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('ToDoを追加しました')),
-                          );
+
+                          final myUid = SharedPrefs.getUid();
+                          await addList(myUid);
+
+                          // 前のページに戻る
                           Navigator.pop(context);
                         }
                       },
