@@ -5,14 +5,16 @@ import 'package:study_with_us_test/pages/measure_study/measure_top_page.dart';
 import 'package:study_with_us_test/pages/study_rooms/study_rooms_top_page.dart';
 import 'package:study_with_us_test/pages/user_profile/user_profile_top_page.dart';
 
-class RootWidget extends StatefulWidget {
-  RootWidget({Key? key}) : super(key: key);
+class RootPracticeWidget extends StatefulWidget {
+  final int num;
+
+  RootPracticeWidget(this.num);
 
   @override
-  _RootWidgetState createState() => _RootWidgetState();
+  _RootPracticeWidgetState createState() => _RootPracticeWidgetState();
 }
 
-class _RootWidgetState extends State<RootWidget> {
+class _RootPracticeWidgetState extends State<RootPracticeWidget> {
   int _selectedIndex = 0;
   final _bottomNavigationBarItems = <BottomNavigationBarItem>[];
 
@@ -46,6 +48,8 @@ class _RootWidgetState extends State<RootWidget> {
     for (var i = 1; i < _footerItemNames.length; i++) {
       _bottomNavigationBarItems.add(_UpdateDeactiveState(i));
     }
+
+    _selectedIndex = widget.num;
   }
 
   /// インデックスのアイテムをアクティベートする
